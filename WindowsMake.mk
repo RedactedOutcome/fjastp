@@ -46,6 +46,7 @@ CORE_DIR = $(SRC_DIR)Core/
 
 Files+= $(SRC_DIR)Parser.cpp
 Files+= $(SRC_DIR)Tokenizer.cpp
+Files+= $(SRC_DIR)Token.cpp
 
 ifneq (${VCPKG_ROOT},)
 IncludeDirs += /I"${VCPKG_ROOT}\installed\$(Architecture)-windows\include" /I"${VCPKG_ROOT}\installed\$(Architecture)-windows-static\include"

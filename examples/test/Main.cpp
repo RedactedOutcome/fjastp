@@ -11,19 +11,19 @@ int main(int argc, char** argv){
     HBuffer test1;
 
     if(argc <= 1){
-        std::ifstream file("examples/test/res/test1.js", std::ios::binary);
+        std::cout << "Using test1.js"<<std::endl;
+        std::ifstream file("examples/test/res/test1.js", std::ios::binary | std::ios::ate);
         if(!file){
             std::cout << "Failed to open file res/test1.js"<<std::endl;
             return -1;
         }
 
-        file.seekg(std::ios::beg);
         size_t len = file.tellg();
-        file.seekg(std::ios::end);
+        file.seekg(std::ios::beg);
+        std::cout << "File is " << len << " bytes"<<std::endl;
 
         char* data = new char[len];
-        std::filebuf* buf = file.rdbuf();
-        buf->sgetn(data, len);
+        file.read(data, len);
         test1 = HBuffer(data, len, true, true);
     }else{
         test1 = argv[1];
@@ -31,6 +31,16 @@ int main(int argc, char** argv){
 
     std::cout << "Starting"<<std::endl;
     FJASTP::Tokenizer t;
-    int status = t.Tokenize(test1);
-    std::cout << "Tokenize status is " << status<<std::endl;
+    std::vector<FJASTP::Token> tokens;
+    FJASTP::TokenizeResult result = t.Tokenize(test1, tokens);
+
+    if(!result){
+        std::cout << "Error Tokenizing Javascript. Error " << (int)result.m_ErrorCode << " at " << result.m_Line << ":" << result.m_Column <<std::endl;
+        return -1;
+    }
+
+    for(size_t i = 0; i < tokens.size(); i++){
+        FJASTP::Token& token = tokens[i];
+        std::cout << "Token " << i << " Is (" << token.GetName().GetCStr() << " " << token.GetValue().GetCStr()<<std::endl;
+    }
 }

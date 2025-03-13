@@ -1,11 +1,11 @@
 #pragma once
 
-namespace fjastp{
+namespace FJASTP{
     enum class TokenizerError{
         Success=0,
-        EndOfFile
+        EndOfFile,
+        UnsupportedToken,
     };
-
 
     enum class ParserError{
         Success=0
