@@ -14,7 +14,7 @@ Libs = GDI32.lib Shell32.lib kernel32.lib User32.lib
 LibFlags = $(IntDir)*.obj /out:$(OutputDir)$(TargetName).lib
 
 ExampleFiles = examples/test/Main.cpp
-ExampleLibs+=fjastp.lib
+ExampleLibs+=$(TargetName).lib
 ExampleLibDirs+= /LIBPATH:"$(OutputDir)"
 ExampleLFlags += $(ExampleIntDir)*.obj /out:$(ExampleOutputDir)Example.exe
 

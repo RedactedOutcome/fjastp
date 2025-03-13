@@ -1,14 +1,14 @@
 #Architecture can be [x64]
 Platform = Windows
 Configuration = Release
-TargetName = fjastp
+TargetName = FJASTP
 Architecture = x64
 
 Config=$(Configuration)/$(Architecture)-$(Platform)/
-OutputDir = bin/jfastp/$(Config)/
-IntDir = bin-int/jfastp/$(Config)/
-ExampleOutputDir=bin/example/$(Config)/
-ExampleIntDir=bin-int/example/$(Config)/
+OutputDir = bin/$(TargetName)/$(Config)/
+IntDir = bin-int/$(TargetName)/$(Config)/
+ExampleOutputDir=bin/example/$(Config)
+ExampleIntDir=bin-int/example/$(Config)
 Include = include/
 
 MF =

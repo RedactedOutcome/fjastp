@@ -7,9 +7,9 @@
 #include <vector>
 #endif
 
-#include "fjastp.h"
+#include "FJASTP.h"
 
-namespace FJP{
+namespace FJASTP{
     class Tokenizer{
     public:
         int Tokenize(const HBuffer& input) noexcept;

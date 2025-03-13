@@ -1,6 +1,6 @@
 #pragma once
 
-namespace fjastp{
+namespace FJASTP{
     class Parser{
     public:
         
