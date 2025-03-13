@@ -6,7 +6,7 @@ LK = link
 CFlags = /c /std:c++17 /MD /utf-8
 LibCFlags = /Fo$(IntDir) 
 ExampleCFlags = /Fo$(ExampleIntDir)
-Defines = /DPLATFORM=Windows /DWINDOWS_IGNORE_PACKING_MISMATCH /DFJASTP_USE_PCH /DFJASTP_PCH_DIR="\"fjastp/pch.h\""
+Defines = /DPLATFORM=Windows /DWINDOWS_IGNORE_PACKING_MISMATCH /DFJASTP_USE_PCH /DFJASTP_PCH_DIR="\"pch.h\""
 IncludeDirs = /I"$(HBUFFER_LIB_SRC)/include/" /I"include/" /I"include/fjastp/"
 LibDirs = 
 Libs = GDI32.lib Shell32.lib kernel32.lib User32.lib
