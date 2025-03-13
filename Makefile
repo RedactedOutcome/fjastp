@@ -46,7 +46,8 @@ build: make_folders
 build_example:
 	$(MF) $(ExampleIntDir)
 	$(MF) $(ExampleOutputDir)
-	$(CC) $(ExampleFiles) $(CFlags) $(ExampleCFlags) $(Defines) $(IncludeDirs) /Yupch.h /Fp$(IntDir)pch.pch 
+	$(CC) $(ExampleFiles) $(CFlags) $(ExampleCFlags) $(Defines) $(IncludeDirs)
+# /Yupch.h /Fp$(IntDir)pch.pch 
 	$(LK) $(LFlags) $(ExampleLFlags) $(LibDirs) $(Libs) $(ExampleLibs) $(ExampleLibDirs)
 run:
 	$(ExampleOutputDir)Example.exe
