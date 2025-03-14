@@ -14,9 +14,10 @@ namespace FJASTP{
             char c = input.At(m_At);
             
             switch(c){
-                case ' ':
+                case ' ':{
                     m_At++;
                     continue;
+                }
                 case '\15':{
                     char next = m_CurrentInput.Get(++m_At);
                     if(next == '\n'){
@@ -25,10 +26,11 @@ namespace FJASTP{
                     }
                     continue;
                 }
-                case '\n':
+                case '\n':{
                     m_Line++;
                     m_CurrentLineStart=++m_At;
                     continue;
+                }
                 case '{':
                 case '}':
                 case '[':
@@ -39,10 +41,11 @@ namespace FJASTP{
                 case ',':
                 case '.':
                 case ';':
-                case '?':
+                case '?':{
                     m_CurrentOutput->emplace_back(Token(TokenType::Punctuator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn()));
                     m_At++;
                     break;
+                }
                 case 'A':
                 case 'B':
                 case 'C':
@@ -194,10 +197,11 @@ namespace FJASTP{
             }
             break;
         }
-        
+
         size_t identifierSize = (m_At - startAt);
         HBuffer buff = m_CurrentInput.SubPointer(startAt, identifierSize);
-        m_CurrentOutput->emplace_back(Token(TokenType::Identifier, std::move(buff), m_Line, GetCurrentColumn(startAt)));
+        TokenType tokenType = FJASTP::IsKeyword(buff) ? TokenType::Keyword : TokenType::Identifier;
+        m_CurrentOutput->emplace_back(Token(tokenType, std::move(buff), m_Line, GetCurrentColumn(startAt)));
         //Success no need to return anything
         return TokenizeResult();
     }

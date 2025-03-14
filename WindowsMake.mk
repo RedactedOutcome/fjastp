@@ -44,6 +44,7 @@ CORE_DIR = $(SRC_DIR)Core/
 #Files += $(SRC_DIR)libs/HBuffer.cpp
 #Files += $(SRC_DIR)libs/HBufferJoin.cpp
 
+Files+= $(SRC_DIR)FJASTP.cpp
 Files+= $(SRC_DIR)Parser.cpp
 Files+= $(SRC_DIR)Tokenizer.cpp
 Files+= $(SRC_DIR)Token.cpp

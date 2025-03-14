@@ -30,6 +30,12 @@ int main(int argc, char** argv){
     }
 
     std::cout << "Starting"<<std::endl;
+    FJASTP::InitializationResult initResult = FJASTP::FJASTP::Init();
+    if(initResult != FJASTP::InitializationResult::Success){
+        std::cout << "Failed to initialize FJASTP"<<std::endl;
+        return -1;
+    }
+
     FJASTP::Tokenizer t;
     std::vector<FJASTP::Token> tokens;
     FJASTP::TokenizeResult result = t.Tokenize(test1, tokens);
