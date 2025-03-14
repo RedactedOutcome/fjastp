@@ -79,6 +79,24 @@ namespace FJASTP{
                     if(!result)return result;
                     break;
                 }
+                case '=':{
+                    m_At++;
+                    char nextChar = m_CurrentInput.Get(m_At);
+                    if(nextChar == '='){
+                        char afterNext = m_CurrentInput.Get(m_At + 1);
+                        if(afterNext == '='){
+                            m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("===", 3, false, false), m_Line, GetCurrentColumn()));
+                            continue;
+                        }else if (afterNext == '>'){
+                            m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("=>", 2, false, false), m_Line, GetCurrentColumn()));
+                            continue;
+                        }
+                        m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("==", 2, false, false), m_Line, GetCurrentColumn()));
+                    }else{
+                        m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("=", 1, false, false), m_Line, GetCurrentColumn()));
+                    }
+                    break;
+                }
                 default:
                     if(c & 0b10000000){
                         TokenizeResult result = ParseIdentifier(c);
@@ -148,7 +166,7 @@ namespace FJASTP{
         }
         
         size_t identifierSize = (m_At - startAt);
-        HBuffer buff = m_CurrentInput.SubBuffer(startAt, identifierSize);
+        HBuffer buff = m_CurrentInput.SubPointer(startAt, identifierSize);
         m_CurrentOutput->emplace_back(Token(TokenType::Identifier, std::move(buff), m_Line, GetCurrentColumn(startAt)));
         //Success no need to return anything
         return TokenizeResult();
