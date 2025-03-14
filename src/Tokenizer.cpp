@@ -125,7 +125,7 @@ namespace FJASTP{
         else
             return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
         if(m_At + bytes >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
-
+        
         uint32_t character = startChar & ((2 ^ (8 - bytes))- 1);
         size_t startAt = m_At;
 
