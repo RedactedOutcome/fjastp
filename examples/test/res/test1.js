@@ -1,3 +1,5 @@
 class Test1{
-    constructor(){}
+    constructor(){
+        this
+    }
 }
