@@ -80,14 +80,16 @@ namespace FJASTP{
                     break;
                 }
                 case '=':{
-                    m_At++;
-                    char nextChar = m_CurrentInput.Get(m_At);
+                    char nextChar = m_CurrentInput.Get(++m_At);
                     if(nextChar == '='){
-                        char afterNext = m_CurrentInput.Get(m_At + 1);
+                        char afterNext = m_CurrentInput.Get(++m_At);
+                        std::cout << "After next is " << afterNext<<std::endl;
                         if(afterNext == '='){
+                            m_At++;
                             m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("===", 3, false, false), m_Line, GetCurrentColumn()));
                             continue;
                         }else if (afterNext == '>'){
+                            m_At++;
                             m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("=>", 2, false, false), m_Line, GetCurrentColumn()));
                             continue;
                         }
@@ -136,7 +138,7 @@ namespace FJASTP{
             character |= (currentByte & 0b111111);
         }
         m_At++;
-        m_UnicodeBytesInLine+=bytes;
+        m_UnicodeBytesInLine+=bytes - 1;
 
         bool valid = (character >= 0x80 && character <= 0x7FF) || ((character >= 0x800 && character <= 0xFFFF) && character != 0xD800 && character != 0xDFFF) || (character >= 0x10000 && character <= 0x10FFFF);
         return valid ? TokenizeResult() : TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidUTF8Character);
@@ -149,10 +151,12 @@ namespace FJASTP{
             TokenizeResult result = ValidateUTF8();
             if(!result)return result;
         }
-        m_At++;
+        else m_At++;
+
         while(true){
             if(m_At >= m_InputSize)break;
             char c = m_CurrentInput.At(m_At);
+
             if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '$'){
                 m_At++;
                 continue;

@@ -33,7 +33,7 @@ int main(int argc, char** argv){
     FJASTP::Tokenizer t;
     std::vector<FJASTP::Token> tokens;
     FJASTP::TokenizeResult result = t.Tokenize(test1, tokens);
-
+    
     if(!result){
         std::cout << "Error Tokenizing Javascript. Error " << (int)result.m_ErrorCode << " at " << result.m_Line << ":" << result.m_Column <<std::endl;
         //return -1;
