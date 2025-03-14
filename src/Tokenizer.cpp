@@ -141,7 +141,7 @@ namespace FJASTP{
         }
         m_At+=bytes;
         m_UnicodeBytesInLine+=bytes - 1;
-
+        
         bool valid = (character >= 0x80 && character <= 0x7FF) || ((character >= 0x800 && character <= 0xFFFF) && character != 0xD800 && character != 0xDFFF) || (character >= 0x10000 && character <= 0x10FFFF);
         return valid ? TokenizeResult() : TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidUTF8Character);
     }
