@@ -1,1 +1,3 @@
-久1久2久denti55fier_CAPPS =s==cap=>balls===
+class Test1{
+    
+}

@@ -17,10 +17,32 @@ namespace FJASTP{
                 case ' ':
                     m_At++;
                     continue;
+                case '\15':{
+                    char next = m_CurrentInput.Get(++m_At);
+                    if(next == '\n'){
+                        m_Line++;
+                        m_CurrentLineStart=++m_At;
+                    }
+                    continue;
+                }
                 case '\n':
                     m_Line++;
-                    m_CurrentLineStart=m_At++;
+                    m_CurrentLineStart=++m_At;
                     continue;
+                case '{':
+                case '}':
+                case '[':
+                case ']':
+                case '(':
+                case ')':
+                case ':':
+                case ',':
+                case '.':
+                case ';':
+                case '?':
+                    m_CurrentOutput->emplace_back(Token(TokenType::Punctuator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn()));
+                    m_At++;
+                    break;
                 case 'A':
                 case 'B':
                 case 'C':
@@ -106,6 +128,7 @@ namespace FJASTP{
                         if(!result)return result;
                         continue;
                     }
+                    std::cout << "Unsupported token " << (size_t)c << " " << c <<std::endl;
                     return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
                 }
         }
