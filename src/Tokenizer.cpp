@@ -83,18 +83,19 @@ namespace FJASTP{
                     char nextChar = m_CurrentInput.Get(++m_At);
                     if(nextChar == '='){
                         char afterNext = m_CurrentInput.Get(++m_At);
-                        std::cout << "After next is " << afterNext<<std::endl;
                         if(afterNext == '='){
                             m_At++;
                             m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("===", 3, false, false), m_Line, GetCurrentColumn()));
                             continue;
-                        }else if (afterNext == '>'){
-                            m_At++;
-                            m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("=>", 2, false, false), m_Line, GetCurrentColumn()));
-                            continue;
                         }
                         m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("==", 2, false, false), m_Line, GetCurrentColumn()));
-                    }else{
+                    }
+                    else if (nextChar == '>'){
+                        m_At++;
+                        m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("=>", 2, false, false), m_Line, GetCurrentColumn()));
+                        continue;
+                    }
+                    else{
                         m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("=", 1, false, false), m_Line, GetCurrentColumn()));
                     }
                     break;
@@ -124,8 +125,9 @@ namespace FJASTP{
             bytes = 4;
         else
             return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
-        if(m_At + bytes >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
         
+        if(m_At + bytes >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
+
         uint32_t character = startChar & ((2 ^ (8 - bytes))- 1);
         size_t startAt = m_At;
 
@@ -165,6 +167,7 @@ namespace FJASTP{
             if(c & 0b10000000){
                 TokenizeResult result = ValidateUTF8();
                 if(!result)return result;
+                continue;
             }
             break;
         }
