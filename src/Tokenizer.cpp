@@ -9,102 +9,141 @@ namespace FJASTP{
 
         m_InputSize = input.GetSize();
 
-        for(m_At = 0; m_At < m_InputSize; m_At++){
+        while(true){
+            if(m_At >= m_InputSize)return TokenizeResult();
             char c = input.At(m_At);
-
+            
             switch(c){
-            case ' ':
-                continue;
-            case 'A':
-            case 'B':
-            case 'C':
-            case 'D':
-            case 'E':
-            case 'F':
-            case 'G':
-            case 'H':
-            case 'I':
-            case 'J':
-            case 'K':
-            case 'L':
-            case 'M':
-            case 'N':
-            case 'O':
-            case 'P':
-            case 'Q':
-            case 'R':
-            case 'S':
-            case 'T':
-            case 'U':
-            case 'V':
-            case 'W':
-            case 'X':
-            case 'Y':
-            case 'Z':
-            case 'a':
-            case 'b':
-            case 'c':
-            case 'd':
-            case 'e':
-            case 'f':
-            case 'g':
-            case 'h':
-            case 'i':
-            case 'j':
-            case 'k':
-            case 'l':
-            case 'm':
-            case 'n':
-            case 'o':
-            case 'p':
-            case 'q':
-            case 'r':
-            case 's':
-            case 't':
-            case 'u':
-            case 'v':
-            case 'w':
-            case 'x':
-            case 'y':
-            case 'z':{
-                //Is valid Identifier Start
-                TokenizeResult result = ParseIdentifier(m_At);
-                if(!result)return result;
-                break;
-            }
-            default:
-                if(c > 127){
-                    size_t startAt = m_At;
-
-                    //Unicode character
-                    int8_t bytes;
-                    if((c & 0b11100000) == 0b11000000)
-                        bytes = 2;
-                    else if((c & 0b11110000) == 0b11100000)
-                        bytes = 3;
-                    else if((c & 0b11111000) == 0b11110000)
-                        bytes = 4;
-                    else
-                        return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
-                    if(m_At + bytes >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
-                    m_UnicodeBytesInLine+=bytes;
-                    uint32_t character = 0;
-                    while(bytes > 0){
-                        character<<=8;
-                        character|=input.At(m_At++);
-                        bytes--;
-                    }
-
-                    TokenizeResult result = ParseIdentifier(startAt);
+                case ' ':
+                    m_At++;
+                    continue;
+                case '\n':
+                    m_Line++;
+                    m_CurrentLineStart=m_At++;
+                    continue;
+                case 'A':
+                case 'B':
+                case 'C':
+                case 'D':
+                case 'E':
+                case 'F':
+                case 'G':
+                case 'H':
+                case 'I':
+                case 'J':
+                case 'K':
+                case 'L':
+                case 'M':
+                case 'N':
+                case 'O':
+                case 'P':
+                case 'Q':
+                case 'R':
+                case 'S':
+                case 'T':
+                case 'U':
+                case 'V':
+                case 'W':
+                case 'X':
+                case 'Y':
+                case 'Z':
+                case 'a':
+                case 'b':
+                case 'c':
+                case 'd':
+                case 'e':
+                case 'f':
+                case 'g':
+                case 'h':
+                case 'i':
+                case 'j':
+                case 'k':
+                case 'l':
+                case 'm':
+                case 'n':
+                case 'o':
+                case 'p':
+                case 'q':
+                case 'r':
+                case 's':
+                case 't':
+                case 'u':
+                case 'v':
+                case 'w':
+                case 'x':
+                case 'y':
+                case 'z':
+                case '_':{
+                    //Is valid Identifier Start
+                    TokenizeResult result = ParseIdentifier(c);
                     if(!result)return result;
+                    break;
                 }
-                return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
-            }
+                default:
+                    if(c > 127){
+                        TokenizeResult result = ParseIdentifier(c);
+                        if(!result)return result;
+                    }
+                    return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
+                }
         }
+
         return TokenizeResult();
     }
 
-    TokenizeResult Tokenizer::ParseIdentifier(size_t at) noexcept{
+    TokenizeResult Tokenizer::ValidateUTF8() noexcept{
+        //Unicode character
+        char startChar = m_CurrentInput.At(m_At);
+        int8_t bytes;
+        if((startChar & 0b11100000) == 0b11000000)
+            bytes = 2;
+        else if((startChar & 0b11110000) == 0b11100000)
+            bytes = 3;
+        else if((startChar & 0b11111000) == 0b11110000)
+            bytes = 4;
+        else
+            return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
+        if(m_At + bytes >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
+        m_UnicodeBytesInLine+=bytes;
+        uint32_t character = 0;
+        while(bytes > 0){
+            character<<=8;
+            character|=m_CurrentInput.At(++m_At);
+            bytes--;
+        }
+
+        bool valid = (character >= 0x80 && character <= 0x7FF) || ((character >= 0x800 && character <= 0xFFFF) && character != 0xD800 && character != 0xDFFF) || (character >= 0x10000 && character <= 0x10FFFF);
+        return valid ? TokenizeResult() : TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidUTF8Character);
+    }
+
+    TokenizeResult Tokenizer::ParseIdentifier(char startChar) noexcept{
+        size_t startAt = m_At;
+
+        if(startChar > 127){
+            TokenizeResult result = ValidateUTF8();
+            if(!result)return result;
+        }
+        m_At++;
+        while(true){
+            if(m_At >= m_InputSize)break;
+            char c = m_CurrentInput.At(m_At);
+            if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '$'){
+                m_At++;
+                continue;
+            }
+
+            if(c > 127){
+                TokenizeResult result = ValidateUTF8();
+                if(!result)return result;
+            }
+            break;
+        }
         
+        size_t identifierSize = (m_At - startAt);
+        HBuffer buff = m_CurrentInput.SubBuffer(startAt, identifierSize);
+        std::cout << "Added " << buff.SubString(0, -1).GetCStr() << " with " << identifierSize << "bytes" << std::endl;
+        m_CurrentOutput->emplace_back(Token(TokenType::Identifier, std::move(buff), m_Line, GetCurrentColumn(startAt)));
+        //Success no need to return anything
+        return TokenizeResult();
     }
 }

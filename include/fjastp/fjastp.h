@@ -23,6 +23,7 @@ namespace FJASTP{
         Success=0,
         EndOfFile,
         UnsupportedToken,
+        InvalidUTF8Character,
     };
 
     enum class ParserError{

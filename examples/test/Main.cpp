@@ -36,11 +36,11 @@ int main(int argc, char** argv){
 
     if(!result){
         std::cout << "Error Tokenizing Javascript. Error " << (int)result.m_ErrorCode << " at " << result.m_Line << ":" << result.m_Column <<std::endl;
-        return -1;
+        //return -1;
     }
 
     for(size_t i = 0; i < tokens.size(); i++){
         FJASTP::Token& token = tokens[i];
-        std::cout << "Token " << i << " Is (" << token.GetName().GetCStr() << " " << token.GetValue().GetCStr()<<std::endl;
+        std::cout << "Token " << i << " Is (" << (int)token.GetType() << " " << token.GetValue().SubString(0, -1).GetCStr() << ")" << std::endl;
     }
 }
