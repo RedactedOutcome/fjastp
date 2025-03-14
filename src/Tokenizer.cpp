@@ -36,13 +36,18 @@ namespace FJASTP{
                 case '[':
                 case ']':
                 case '(':
-                case ')':
+                case ')':{
+                    m_CurrentOutput->emplace_back(Token(TokenType::GroupingSymbol, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn()));
+                    m_At++;
+                    break;
+                }
                 case ':':
                 case ',':
                 case '.':
                 case ';':
+                case '`':
                 case '?':{
-                    m_CurrentOutput->emplace_back(Token(TokenType::Punctuator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn()));
+                    m_CurrentOutput->emplace_back(Token(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn()));
                     m_At++;
                     break;
                 }
@@ -197,7 +202,7 @@ namespace FJASTP{
             }
             break;
         }
-
+        
         size_t identifierSize = (m_At - startAt);
         HBuffer buff = m_CurrentInput.SubPointer(startAt, identifierSize);
         TokenType tokenType = FJASTP::IsKeyword(buff) ? TokenType::Keyword : TokenType::Identifier;

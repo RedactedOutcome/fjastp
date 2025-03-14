@@ -45,8 +45,7 @@ int main(int argc, char** argv){
         //return -1;
     }
 
-    std::cout << "Done parsing"<<std::endl;
-    return 0;
+    std::cout << "Done Tokenizing"<<std::endl;
 
     for(size_t i = 0; i < tokens.size(); i++){
         FJASTP::Token& token = tokens[i];
