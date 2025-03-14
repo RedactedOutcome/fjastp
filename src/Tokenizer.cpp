@@ -80,7 +80,6 @@ namespace FJASTP{
                     break;
                 }
                 default:
-                    std::cout << "Char is " << (uint8_t)c << " or " << c <<std::endl;
                     if(c & 0b10000000){
                         TokenizeResult result = ParseIdentifier(c);
                         if(!result)return result;
@@ -107,20 +106,16 @@ namespace FJASTP{
             return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
         if(m_At + bytes >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
 
-        uint32_t character = 0;
+        uint32_t character = startChar & ((2 ^ (8 - bytes))- 1);
         size_t startAt = m_At;
 
-        std::cout << "Char has " << (int)bytes<<std::endl;
         for(uint8_t i = 1; i < bytes; i++){
-            std::cout << "Called"<<std::endl;
             character<<=6;
             uint8_t currentByte = m_CurrentInput.At(++m_At);
-            if(currentByte & 0b11000000 != 0b10000000){
+            if((currentByte & 0b11000000) != 0b10000000)
                 return TokenizeResult(m_Line, GetCurrentColumn(startAt), TokenizerError::InvalidUTF8Character);
-            }
-
-            character|=currentByte;
-            bytes--;
+            
+            character |= (currentByte & 0b111111);
         }
         m_At++;
         m_UnicodeBytesInLine+=bytes;
@@ -154,7 +149,6 @@ namespace FJASTP{
         
         size_t identifierSize = (m_At - startAt);
         HBuffer buff = m_CurrentInput.SubBuffer(startAt, identifierSize);
-        std::cout << "Added " << buff.SubString(0, -1).GetCStr() << " with " << identifierSize << "bytes" << std::endl;
         m_CurrentOutput->emplace_back(Token(TokenType::Identifier, std::move(buff), m_Line, GetCurrentColumn(startAt)));
         //Success no need to return anything
         return TokenizeResult();
