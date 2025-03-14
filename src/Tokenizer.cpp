@@ -80,9 +80,11 @@ namespace FJASTP{
                     break;
                 }
                 default:
-                    if(c > 127){
+                    std::cout << "Char is " << (uint8_t)c << " or " << c <<std::endl;
+                    if(c & 0b10000000){
                         TokenizeResult result = ParseIdentifier(c);
                         if(!result)return result;
+                        continue;
                     }
                     return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
                 }
@@ -104,13 +106,24 @@ namespace FJASTP{
         else
             return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
         if(m_At + bytes >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
-        m_UnicodeBytesInLine+=bytes;
+
         uint32_t character = 0;
-        while(bytes > 0){
-            character<<=8;
-            character|=m_CurrentInput.At(++m_At);
+        size_t startAt = m_At;
+
+        std::cout << "Char has " << (int)bytes<<std::endl;
+        for(uint8_t i = 1; i < bytes; i++){
+            std::cout << "Called"<<std::endl;
+            character<<=6;
+            uint8_t currentByte = m_CurrentInput.At(++m_At);
+            if(currentByte & 0b11000000 != 0b10000000){
+                return TokenizeResult(m_Line, GetCurrentColumn(startAt), TokenizerError::InvalidUTF8Character);
+            }
+
+            character|=currentByte;
             bytes--;
         }
+        m_At++;
+        m_UnicodeBytesInLine+=bytes;
 
         bool valid = (character >= 0x80 && character <= 0x7FF) || ((character >= 0x800 && character <= 0xFFFF) && character != 0xD800 && character != 0xDFFF) || (character >= 0x10000 && character <= 0x10FFFF);
         return valid ? TokenizeResult() : TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidUTF8Character);
@@ -119,7 +132,7 @@ namespace FJASTP{
     TokenizeResult Tokenizer::ParseIdentifier(char startChar) noexcept{
         size_t startAt = m_At;
 
-        if(startChar > 127){
+        if(startChar & 128){
             TokenizeResult result = ValidateUTF8();
             if(!result)return result;
         }
@@ -132,7 +145,7 @@ namespace FJASTP{
                 continue;
             }
 
-            if(c > 127){
+            if(c & 0b10000000){
                 TokenizeResult result = ValidateUTF8();
                 if(!result)return result;
             }
