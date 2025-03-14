@@ -43,12 +43,90 @@ namespace FJASTP{
                 }
                 case ':':
                 case ',':
-                case '.':
                 case ';':
                 case '`':
                 case '?':{
                     m_CurrentOutput->emplace_back(Token(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn()));
                     m_At++;
+                    break;
+                }
+                //TODO: handle numerical literals that start with a .
+                case '.':{
+                    /// TODO: if we break the character loop we need to verify if a valid seperator/token is following it. Identifiers cant immediately follow without a white space or valid token
+                    char nextChar = m_CurrentInput.Get(++m_At);
+                    if(nextChar >= '0' && nextChar <= '9'){
+                        //Floating Point Numerical Literal
+                        size_t startAt = m_At-1;
+                        m_At++;
+
+                        //Scientific Notation
+                        bool usesNotation = false;
+                        bool isNegative = false;
+                        uint8_t notationAt=0;
+                        std::cout<<"Starting"<<std::endl;
+                        while(true){
+                            if(m_At >= m_InputSize)break;
+                            char current = m_CurrentInput.At(m_At);
+
+                            if(current >= '0' && current <= '9'){
+                                m_At++;
+                                continue;
+                            }
+
+                            if(current == 'e' || current == 'E'){
+                                if(usesNotation)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                usesNotation = true;
+
+                                if(++m_At >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
+                                current = m_CurrentInput.At(m_At);
+                                if(current == '-'){
+                                    isNegative = true;
+                                    if(++m_At >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
+                                    current = m_CurrentInput.At(m_At);
+                                }
+                                else if(current == '+'){
+                                    if(++m_At >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
+                                    current = m_CurrentInput.At(m_At);
+                                }
+
+                                size_t exponentStart = m_At;
+
+                                //Check for digits
+                                while(true){
+                                    current = m_CurrentInput.Get(m_At);
+                                    if(current >= '0' && current <= '9'){
+                                        m_At++;
+                                        continue;
+                                    }
+                                    break;
+                                }
+
+                                if(m_At - exponentStart <= 1)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                continue;
+                            }
+                            break;
+                        }
+                        uint8_t metadata = (isNegative ? 128 : 0) | (usesNotation ? 64 : 0);
+                        m_CurrentOutput->emplace_back(Token(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, GetCurrentColumn()));
+                        break;
+                    }
+                    m_CurrentOutput->emplace_back(Token(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn()));
+                    break;
+                }
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':{
+                    //Numerical Literal
+                    size_t m_StartAt = m_At++;
+                    bool isFloatingPoint = false;
+                    
                     break;
                 }
                 case 'A':
@@ -202,7 +280,7 @@ namespace FJASTP{
             }
             break;
         }
-        
+
         size_t identifierSize = (m_At - startAt);
         HBuffer buff = m_CurrentInput.SubPointer(startAt, identifierSize);
         TokenType tokenType = FJASTP::IsKeyword(buff) ? TokenType::Keyword : TokenType::Identifier;

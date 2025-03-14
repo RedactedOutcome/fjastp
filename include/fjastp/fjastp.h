@@ -34,6 +34,7 @@ namespace FJASTP{
         EndOfFile,
         UnsupportedToken,
         InvalidUTF8Character,
+        InvalidNumericalLiteral
     };
 
     enum class ParserError{
