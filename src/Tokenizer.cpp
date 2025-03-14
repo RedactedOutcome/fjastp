@@ -2,13 +2,15 @@
 #include "Tokenizer.h"
 
 namespace FJASTP{
-    TokenizeResult Tokenizer::Tokenize(const HBuffer& input, std::vector<Token>& output) noexcept{
-        size_t inputSize = input.GetSize();
 
-        size_t line = 1;
-        size_t lastLineAt = 0; //Used for calculating the column with (at - lastLineAt) + 1
-        for(size_t at = 0; at < inputSize; at++){
-            char c = input.At(at);
+    TokenizeResult Tokenizer::Tokenize(const HBuffer& input, std::vector<Token>& output) noexcept{
+        m_CurrentInput = input;
+        m_CurrentOutput = &output;
+
+        m_InputSize = input.GetSize();
+
+        for(m_At = 0; m_At < m_InputSize; m_At++){
+            char c = input.At(m_At);
 
             switch(c){
             case ' ':
@@ -66,18 +68,43 @@ namespace FJASTP{
             case 'y':
             case 'z':{
                 //Is valid Identifier Start
-                size_t identifierStart = at++;
-                while(true){
-                    if(at >= inputSize)return TokenizeResult(line, at - lastLineAt + 1, TokenizerError::EndOfFile);
-                    c = input.At(at++);
-                    if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c ==
-                }
+                TokenizeResult result = ParseIdentifier(m_At);
+                if(!result)return result;
                 break;
             }
             default:
-                return TokenizeResult(line, (at - lastLineAt) + 1, TokenizerError::UnsupportedToken);
+                if(c > 127){
+                    size_t startAt = m_At;
+
+                    //Unicode character
+                    int8_t bytes;
+                    if((c & 0b11100000) == 0b11000000)
+                        bytes = 2;
+                    else if((c & 0b11110000) == 0b11100000)
+                        bytes = 3;
+                    else if((c & 0b11111000) == 0b11110000)
+                        bytes = 4;
+                    else
+                        return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
+                    if(m_At + bytes >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
+                    m_UnicodeBytesInLine+=bytes;
+                    uint32_t character = 0;
+                    while(bytes > 0){
+                        character<<=8;
+                        character|=input.At(m_At++);
+                        bytes--;
+                    }
+
+                    TokenizeResult result = ParseIdentifier(startAt);
+                    if(!result)return result;
+                }
+                return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::UnsupportedToken);
             }
         }
         return TokenizeResult();
+    }
+
+    TokenizeResult Tokenizer::ParseIdentifier(size_t at) noexcept{
+        
     }
 }
