@@ -133,13 +133,13 @@ namespace FJASTP{
 
         for(uint8_t i = 1; i < bytes; i++){
             character<<=6;
-            uint8_t currentByte = m_CurrentInput.At(++m_At);
+            uint8_t currentByte = m_CurrentInput.At(m_At + i);
             if((currentByte & 0b11000000) != 0b10000000)
                 return TokenizeResult(m_Line, GetCurrentColumn(startAt), TokenizerError::InvalidUTF8Character);
             
             character |= (currentByte & 0b111111);
         }
-        m_At++;
+        m_At+=bytes;
         m_UnicodeBytesInLine+=bytes - 1;
 
         bool valid = (character >= 0x80 && character <= 0x7FF) || ((character >= 0x800 && character <= 0xFFFF) && character != 0xD800 && character != 0xDFFF) || (character >= 0x10000 && character <= 0x10FFFF);
